@@ -1,5 +1,4 @@
 const router = require('express').Router();
-const { EmptyResultError } = require('sequelize');
 const { Product, Category, Tag, ProductTag } = require('../../models');
 
 // The `/api/products` endpoint
@@ -18,9 +17,9 @@ router.get('/', async (req, res) => {
         exclude: ['category_id', 'categoryId']
       },
     });
-    res.json(products);
+    return res.json(products);
   } catch (err) {
-    res.status(500).json(err);
+    return res.status(500).json(err);
   }
 });
 
@@ -40,9 +39,9 @@ router.get('/:id', async (req, res) => {
 
     if (!products) return res.json({ message: 'No product found with that id!' });
 
-    res.json(products);
+    return res.json(products);
   } catch (err) {
-    res.status(500).json(err);
+    return res.status(500).json(err);
   }
 });
 
@@ -132,10 +131,9 @@ router.delete('/:id', async (req, res) => {
 
     if (!products) return res.status(404).json({ message: 'No product found with that id!' });
 
-    res.json(products);
-
+    return res.json(products);
   } catch (err) {
-    res.status(500).json(err);
+    return res.status(500).json(err);
   }
 });
 
