@@ -1,4 +1,5 @@
 const router = require('express').Router();
+const { EmptyResultError } = require('sequelize');
 const { Product, Category, Tag, ProductTag } = require('../../models');
 
 // The `/api/products` endpoint
@@ -11,15 +12,14 @@ router.get('/', async (req, res) => {
     const products = await Product.findAll({
       include: [
         { model: Category },
-        { model: Tag, through: { attributes: [] }},
+        { model: Tag, through: { attributes: [] } },
       ],
       attributes: {
         exclude: ['category_id', 'categoryId']
       },
     });
     res.json(products);
-  }
-  catch (err) {
+  } catch (err) {
     res.status(500).json(err);
   }
 });
@@ -31,18 +31,17 @@ router.get('/:id', async (req, res) => {
   try {
     const products = await Product.findByPk(req.params.id, {
       include: [
-        {model: Category}, {model: Tag, through: { attributes: [] }},
+        { model: Category }, { model: Tag, through: { attributes: [] } },
       ],
       attributes: {
         exclude: ['category_id', 'categoryId']
       },
     });
-    
-    if (!products) return res.json({ message: 'No product found with that id!'});
+
+    if (!products) return res.json({ message: 'No product found with that id!' });
 
     res.json(products);
-  }
-  catch (err) {
+  } catch (err) {
     res.status(500).json(err);
   }
 });
@@ -59,6 +58,7 @@ router.post('/', (req, res) => {
   */
   Product.create(req.body)
     .then((product) => {
+      console.log(req.body);
       // if there's product tags, we need to create pairings to bulk create in the ProductTag model
       if (req.body.tagIds.length) {
         const productTagIdArr = req.body.tagIds.map((tag_id) => {
@@ -121,8 +121,22 @@ router.put('/:id', (req, res) => {
     });
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
   // delete one product by its `id` value
+  try {
+    const products = await Product.destroy({
+      where: {
+        id: req.params.id,
+      },
+    });
+
+    if (!products) return res.status(404).json({ message: 'No product found with that id!' });
+
+    res.json(products);
+
+  } catch (err) {
+    res.status(500).json(err);
+  }
 });
 
 module.exports = router;
