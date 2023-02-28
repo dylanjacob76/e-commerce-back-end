@@ -58,6 +58,8 @@ router.put('/:id', async (req, res) => {
       },
     });
 
+    if (!tags) return res.status(404).json({ message: 'No tag found with that id!' });
+
     return res.json(tags);
   } catch (err) {
     return res.status(500).json(err);
